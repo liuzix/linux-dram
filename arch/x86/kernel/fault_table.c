@@ -4,7 +4,7 @@
 #include <linux/rwlock.h>
 
 /* Defines a hashtable to store all the faulty cells information */
-DEFINE_HASHTABLE(fault_list, 16);
+DEFINE_HASHTABLE(fault_list, 18);
 
 /* We use a slab allocator to mitigate the allocation cost of hashtable nodes */
 struct kmem_cache* fault_list_node_pool = NULL;
@@ -37,6 +37,8 @@ void fault_table_insert(u64 addr) {
 } 
 EXPORT_SYMBOL(fault_table_insert);
 
+
+/* returns total number of faults within a page */
 int fault_table_lookup_page(u64 addr, u32* results, size_t len) {
     read_lock(&fault_list_lock);
 
@@ -45,11 +47,13 @@ int fault_table_lookup_page(u64 addr, u32* results, size_t len) {
 
     u32* it = results;
     u32* it_end = results + len;
+    int numFaults = 0;
     hash_for_each_possible(fault_list, e, node, hashkey) {
         if ((e->address & (~0xFFF)) == hashkey) {
+            numFaults++;
             if (it == it_end) {
                 read_unlock(&fault_list_lock);
-                return;
+                continue;
             }
             *it = (u32)e->address & 0xFFF; // calculate offset within page
             it++;
@@ -57,5 +61,7 @@ int fault_table_lookup_page(u64 addr, u32* results, size_t len) {
     }
 
     read_unlock(&fault_list_lock);
+    return numFaults;
 }
 EXPORT_SYMBOL(fault_table_lookup_page);
+
