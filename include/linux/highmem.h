@@ -8,6 +8,8 @@
 #include <linux/uaccess.h>
 #include <linux/hardirq.h>
 
+#include <linux/fault_table.h>
+
 #include <asm/cacheflush.h>
 
 #ifndef ARCH_HAS_FLUSH_ANON_PAGE
@@ -180,7 +182,17 @@ static inline struct page *
 alloc_zeroed_user_highpage_movable(struct vm_area_struct *vma,
 					unsigned long vaddr)
 {
-	return __alloc_zeroed_user_highpage(__GFP_MOVABLE, vma, vaddr);
+	/* still need to study mempolicy related to this */
+	struct page* page;
+	int has_fault;
+	do {
+		page = __alloc_zeroed_user_highpage(__GFP_MOVABLE, vma, vaddr);
+		has_fault = fault_table_has_fault(page_to_phys(page));
+		if (has_fault) 
+			fault_page_cache_push(page);
+	} while (has_fault);
+	
+	return page;
 }
 
 static inline void clear_highpage(struct page *page)
