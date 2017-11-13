@@ -1,1 +1,1 @@
-/home/zixiong/linux-source-4.10.0/scripts/gdb/vmlinux-gdb.py
+/home/zixiong/linux-dram/scripts/gdb/vmlinux-gdb.py

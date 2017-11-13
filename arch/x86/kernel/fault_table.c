@@ -35,7 +35,6 @@ void __init fault_table_init(void) {
 
 void fault_table_insert(u64 addr) {
     fault_node_t* new_node = kmem_cache_alloc(fault_list_node_pool, GFP_KERNEL);
-
     new_node->address = addr;
     u64 hashkey = addr & (~0xFFF);
 
@@ -54,7 +53,6 @@ EXPORT_SYMBOL(fault_table_insert);
 /* returns total number of faults within a page */
 int fault_table_lookup_page(u64 addr, u32* results, size_t len) {
     read_lock(&fault_list_lock);
-
     fault_node_t *e;
     u64 hashkey = addr & (~0xFFF);
 
