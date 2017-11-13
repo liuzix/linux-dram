@@ -342,7 +342,7 @@
 333 64 update_heap_info sys_update_heap_info
 334 64 get_faulty_address_info sys_get_faulty_address_info
 335 64 reserve_header sys_reserve_header
-336 64 get_error_info sys_get_error_info
+336 64 test_traverse sys_test_traverse
 
 #
 # x32-specific system call numbers start at 512 to avoid cache impact

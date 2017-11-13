@@ -8,7 +8,7 @@ struct free_chunk_info {
     size_t len; // size of the free chunk
 };
 
-typedef free_chunk_info* (*traverse_func_ptr) (void*, size_t, size_t*);
+typedef struct free_chunk_info* (*traverse_func_ptr) (void*, size_t, size_t*);
 
 void register_traverse(int identifier, traverse_func_ptr traverse); 
 

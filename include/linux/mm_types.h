@@ -395,6 +395,17 @@ struct mm_rss_stat {
 };
 
 struct kioctx_table;
+
+struct heap_info {
+	int identifier;
+	void* heapseg_start_ptr;
+	size_t size;
+	int* new_error_info_flag;
+	//lock* flag_lock; 
+	pid_t tid;
+	struct heap_info* next;
+};
+
 struct mm_struct {
 	struct vm_area_struct *mmap;		/* list of VMAs */
 	struct rb_root mm_rb;
@@ -515,6 +526,11 @@ struct mm_struct {
 	atomic_long_t hugetlb_usage;
 #endif
 	struct work_struct async_put_work;
+
+
+	// added by Zixiong
+	struct rw_semaphore heap_info_lock;
+	struct heap_info* heap_info;
 };
 
 static inline void mm_init_cpumask(struct mm_struct *mm)
