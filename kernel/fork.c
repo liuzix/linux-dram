@@ -762,6 +762,7 @@ static struct mm_struct *mm_init(struct mm_struct *mm, struct task_struct *p,
 	atomic_set(&mm->mm_count, 1);
 	/* added by Zixiong*/
 	mm->heap_info = NULL;
+	mm->header_info = NULL;
 	init_rwsem(&mm->heap_info_lock);
 	////
 	init_rwsem(&mm->mmap_sem);

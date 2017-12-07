@@ -909,7 +909,7 @@ asmlinkage long sys_register_heap_info (int mem_allocator_identifier,
 										int* new_error_info_flag);
 
 asmlinkage long sys_update_heap_info  (int mem_allocator_identifier, void* arena_start_ptr, size_t arena_size);
-asmlinkage long sys_get_faulty_address_info (void** buf, size_t arena_start_addr);
+asmlinkage long sys_get_error_info (void** buf, size_t arena_start_addr, size_t count);
 asmlinkage long sys_reserve_header (void* vaddr, size_t len);  
 asmlinkage long sys_test_traverse (void* arena_start_ptr,  size_t VpageNO, size_t* len);
 

@@ -31,6 +31,7 @@ asmlinkage long sys_register_heap_info (int mem_allocator_identifier,
 
 	new_info = kmalloc(sizeof(struct heap_info), GFP_KERNEL);
 	new_info->identifier = mem_allocator_identifier;
+	new_info->arena_ptr = arena_start_ptr;
 	new_info->heapseg_start_ptr = subheap_start_ptr;
 	new_info->size = subheap_size;
 	new_info->new_error_info_flag = new_error_info_flag;
@@ -40,9 +41,11 @@ asmlinkage long sys_register_heap_info (int mem_allocator_identifier,
 	
 
 	struct heap_info* last_info;
-	last_info = NULL;
+
 
 	down_write(&cur_mm->heap_info_lock);
+
+	last_info = cur_mm->heap_info;
 
 	while (last_info && last_info->next) {
 		last_info = last_info->next;
@@ -86,14 +89,77 @@ asmlinkage long sys_test_traverse (void* arena_start_ptr,  size_t VpageNO, size_
 
 }
 
-asmlinkage long sys_update_heap_info  (int mem_allocator_identifier, void* arena_start_ptr, size_t arena_size) {
-	// stubbed out 
-}
+// returns 0 on success, -1 on failure
+// deletes the subheap when arena_size == 0
+asmlinkage long sys_update_heap_info (int mem_allocator_identifier, void* subheap_start_ptr, size_t arena_size) {
+	struct mm_struct* cur_mm;
+	cur_mm = current->mm;
 
-asmlinkage long sys_get_faulty_address_info (void** buf, size_t arena_start_addr) {
-	// stubbed out 
+	struct heap_info* last_info;
+
+
+	down_write(&cur_mm->heap_info_lock);
+
+	last_info = cur_mm->heap_info;
+
+	while (last_info) {
+		if (last_info->heapseg_start_ptr == subheap_start_ptr) {
+			last_info->size = arena_size;
+
+			if (arena_size == 0) {
+				// delete
+				if (last_info->next) {
+					last_info->next = last_info->next->next;
+				}
+			}
+			return 0;
+		}
+
+        
+		last_info = last_info->next;
+	}
+
+	return -1;
+
+	up_write(&cur_mm->heap_info_lock);
+} 
+
+asmlinkage long sys_get_error_info (void** buf, size_t arena_start_addr, size_t count) {
+	
 }
 
 asmlinkage long sys_reserve_header (void* vaddr, size_t len) {
-	// stubbed out 
+	struct mm_struct* cur_mm;
+	struct header_info* new_info;
+
+	cur_mm = current->mm;
+	
+	
+
+	new_info = kmalloc(sizeof(struct header_info), GFP_KERNEL);
+	new_info->header_ptr = vaddr;
+	new_info->header_size = len;
+	new_info->next = NULL;
+
+
+	struct header_info* last_info;
+
+
+	down_write(&cur_mm->heap_info_lock);
+
+	last_info = cur_mm->header_info;
+
+	while (last_info && last_info->next) {
+		last_info = last_info->next;
+	}
+
+	if (!last_info) {
+		cur_mm->header_info = new_info;
+	} else {
+		last_info->next = new_info;
+	}
+
+	up_write(&cur_mm->heap_info_lock);
+
+	return 0;
 }  

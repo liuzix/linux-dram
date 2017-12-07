@@ -396,14 +396,25 @@ struct mm_rss_stat {
 
 struct kioctx_table;
 
+
+// added by Zixiong
 struct heap_info {
 	int identifier;
+	void* arena_ptr;
 	void* heapseg_start_ptr;
 	size_t size;
 	int* new_error_info_flag;
 	//lock* flag_lock; 
 	pid_t tid;
 	struct heap_info* next;
+};
+
+
+// added by Zixiong
+struct header_info {
+	void* header_ptr;
+	size_t header_size;
+	struct header_info* next;
 };
 
 struct mm_struct {
@@ -531,6 +542,8 @@ struct mm_struct {
 	// added by Zixiong
 	struct rw_semaphore heap_info_lock;
 	struct heap_info* heap_info;
+
+	struct header_info* header_info;
 };
 
 static inline void mm_init_cpumask(struct mm_struct *mm)

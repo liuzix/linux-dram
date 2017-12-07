@@ -340,7 +340,7 @@
 331	common	pkey_free		sys_pkey_free
 332 64 register_heap_info sys_register_heap_info
 333 64 update_heap_info sys_update_heap_info
-334 64 get_faulty_address_info sys_get_faulty_address_info
+334 64 get_error_info sys_get_error_info
 335 64 reserve_header sys_reserve_header
 336 64 test_traverse sys_test_traverse
 
