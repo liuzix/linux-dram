@@ -170,6 +170,13 @@ __alloc_zeroed_user_highpage(gfp_t movableflags,
 }
 #endif
 
+
+// added by Zixiong 
+
+struct heap_info* is_in_heap(void* ptr);
+
+struct page* alloc_heap(struct heap_info* heap_info, void* vaddr);
+
 /**
  * alloc_zeroed_user_highpage_movable - Allocate a zeroed HIGHMEM page for a VMA that the caller knows can move
  * @vma: The VMA the page is to be allocated for
@@ -182,17 +189,23 @@ static inline struct page *
 alloc_zeroed_user_highpage_movable(struct vm_area_struct *vma,
 					unsigned long vaddr)
 {
-	/* still need to study mempolicy related to this */
-	struct page* page;
-	int has_fault;
-	do {
-		page = __alloc_zeroed_user_highpage(__GFP_MOVABLE, vma, vaddr);
-		has_fault = fault_table_has_fault(page_to_phys(page));
-		if (has_fault) 
-			fault_page_cache_push(page);
-	} while (has_fault);
-	
-	return page;
+	struct heap_info* heap_info;
+	heap_info = is_in_heap((void*)vaddr);
+	if (heap_info) {
+		return alloc_heap(heap_info, (void*)vaddr);
+	} else {
+		/* still need to study mempolicy related to this */
+		struct page* page;
+		int has_fault;
+		do {
+			page = __alloc_zeroed_user_highpage(__GFP_MOVABLE, vma, vaddr);
+			has_fault = fault_table_has_fault(page_to_phys(page));
+			if (has_fault) 
+				fault_page_cache_push(page);
+		} while (has_fault);
+		
+		return page;
+	}
 }
 
 static inline void clear_highpage(struct page *page)

@@ -11,7 +11,7 @@ struct free_chunk_info {
 typedef struct free_chunk_info* (*traverse_func_ptr) (void*, size_t, size_t*);
 
 void register_traverse(int identifier, traverse_func_ptr traverse); 
-
+struct free_chunk_info* call_traverse(void* arena_ptr, size_t page_no, size_t* len) ;
 
 
 #endif

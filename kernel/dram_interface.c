@@ -14,6 +14,30 @@ void register_traverse(int identifier, traverse_func_ptr traverse) {
 }
 EXPORT_SYMBOL(register_traverse);
 
+struct free_chunk_info* call_traverse(void* arena_ptr, size_t page_no, size_t* len) {
+	struct mm_struct* cur_mm;
+	int ident;
+
+	cur_mm = current->mm;
+
+	down_read(&cur_mm->heap_info_lock);
+
+	if (!cur_mm->heap_info) {
+		printk(KERN_ERR "No Registered Heap!");
+		return;
+	}
+	
+	ident = cur_mm->heap_info->identifier;
+
+	up_read(&cur_mm->heap_info_lock);
+
+	struct free_chunk_info* ret;
+
+	ret = traverse_funcs[ident](arena_ptr, page_no, len);
+
+	return ret;
+}
+
 
 // pending testing
 asmlinkage long sys_register_heap_info (int mem_allocator_identifier, 

@@ -17,6 +17,7 @@
  */
 
 #include <linux/mm.h>
+#include <linux/mm_types.h>
 #include <linux/export.h>
 #include <linux/swap.h>
 #include <linux/bio.h>
@@ -28,6 +29,8 @@
 #include <linux/highmem.h>
 #include <linux/kgdb.h>
 #include <asm/tlbflush.h>
+#include <asm/current.h>
+#include <linux/dram_interface.h>
 
 
 #if defined(CONFIG_HIGHMEM) || defined(CONFIG_X86_32)
@@ -482,3 +485,36 @@ void __init page_address_init(void)
 }
 
 #endif	/* defined(CONFIG_HIGHMEM) && !defined(WANT_PAGE_VIRTUAL) */
+
+
+/* Added by Zixiong. Checks if a given address is in heap. 
+   If it is, returns the heap_info 
+   */
+struct heap_info* is_in_heap(void* ptr) {
+	struct mm_struct* cur_mm;
+	cur_mm = current->mm;
+	
+	struct heap_info* heap_info;
+	heap_info = cur_mm->heap_info;
+
+	while (heap_info) {
+		if (heap_info->heapseg_start_ptr <= ptr 
+			&& heap_info->heapseg_start_ptr + heap_info->size > ptr) {
+			return heap_info;
+		}
+		heap_info = heap_info->next;
+	}
+
+	return NULL;
+}
+
+
+/* gives page that is compatible with the heapseg*/
+struct page* alloc_heap(struct heap_info* heap_info, void* vaddr) {
+	size_t len;
+	struct free_chunk_info* free_chunks;
+
+	free_chunks = call_traverse(heap_info->arena_ptr, ((uint64_t)vaddr) >> 12, &len);
+
+	
+}
