@@ -31,6 +31,10 @@
 #include <asm/tlbflush.h>
 #include <asm/current.h>
 #include <linux/dram_interface.h>
+#include <asm/page.h>
+#include <linux/slab.h>
+#include <linux/list.h>
+#include <linux/fault_table.h>
 
 
 #if defined(CONFIG_HIGHMEM) || defined(CONFIG_X86_32)
@@ -508,13 +512,62 @@ struct heap_info* is_in_heap(void* ptr) {
 	return NULL;
 }
 
+#define MAX_FAULTS_PER_PAGE 64
+
+
+/* returns true iff all faulty cells are in free chunks */
+int is_eligible(struct free_chunk_info* free_chunks, size_t num_free_chunks, struct page* page) {
+	u64 phys = page_to_phys(page);
+	u32* fault_buff = kmalloc(4 * MAX_FAULTS_PER_PAGE, GFP_KERNEL);
+
+	int fault_num = 0;
+	fault_num = fault_table_lookup_page(phys, fault_buff, MAX_FAULTS_PER_PAGE);
+
+	int i, j;
+	for (i = 0; i < fault_num; i++) {
+		// the i-th fault
+		for (j = 0; j < num_free_chunks; j++) {
+			// the j-th free chunk
+			if ((u64)free_chunks[j].start <= phys + fault_buff[i] 
+				&& phys < (u64)free_chunks[j].start + free_chunks[j].len ) {
+				continue;
+			}
+		}
+		return 0;
+	}
+
+	kfree(fault_buff);
+}
+
 
 /* gives page that is compatible with the heapseg*/
-struct page* alloc_heap(struct heap_info* heap_info, void* vaddr) {
+struct page* alloc_heap(struct heap_info* heap_info, void* vaddr, struct vm_area_struct *vma) {
 	size_t len;
 	struct free_chunk_info* free_chunks;
 
 	free_chunks = call_traverse(heap_info->arena_ptr, ((uint64_t)vaddr) >> 12, &len);
 
-	
+	fault_page_cache_node_t* tmp;
+	struct list_head* pos;
+
+	list_for_each(pos, &faulty_page_cache) {
+		tmp = list_entry(pos, fault_page_cache_node_t, node);
+		if (is_eligible(free_chunks, len, tmp->page)) {
+			return tmp->page;
+		}
+	}
+
+	int cnt;
+	for (cnt = 0; cnt < 1024; cnt++) {
+		struct page* page;
+		page = __alloc_zeroed_user_highpage(__GFP_MOVABLE, vma, (unsigned long)vaddr);
+		if (is_eligible(free_chunks, len, page)) {
+			return page;
+		}
+	}
+
+	//unlikely
+
+	printk(KERN_ERR "Cannot find suitable page for heap!!!");
+
 }

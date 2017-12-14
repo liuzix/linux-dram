@@ -28,4 +28,6 @@ typedef struct {
     struct list_head node;
 } fault_page_cache_node_t;
 
+extern struct list_head faulty_page_cache;
+
 #endif

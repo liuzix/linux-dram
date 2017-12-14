@@ -175,7 +175,7 @@ __alloc_zeroed_user_highpage(gfp_t movableflags,
 
 struct heap_info* is_in_heap(void* ptr);
 
-struct page* alloc_heap(struct heap_info* heap_info, void* vaddr);
+struct page* alloc_heap(struct heap_info* heap_info, void* vaddr, struct vm_area_struct *vma);
 
 /**
  * alloc_zeroed_user_highpage_movable - Allocate a zeroed HIGHMEM page for a VMA that the caller knows can move
@@ -192,7 +192,7 @@ alloc_zeroed_user_highpage_movable(struct vm_area_struct *vma,
 	struct heap_info* heap_info;
 	heap_info = is_in_heap((void*)vaddr);
 	if (heap_info) {
-		return alloc_heap(heap_info, (void*)vaddr);
+		return alloc_heap(heap_info, (void*)vaddr, vma);
 	} else {
 		/* still need to study mempolicy related to this */
 		struct page* page;
