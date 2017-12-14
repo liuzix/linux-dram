@@ -31,6 +31,8 @@ struct free_chunk_info* call_traverse(void* arena_ptr, size_t page_no, size_t* l
 
 	up_read(&cur_mm->heap_info_lock);
 
+	
+
 	struct free_chunk_info* ret;
 
 	ret = traverse_funcs[ident](arena_ptr, page_no, len);

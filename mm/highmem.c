@@ -35,6 +35,8 @@
 #include <linux/slab.h>
 #include <linux/list.h>
 #include <linux/fault_table.h>
+#include <linux/dram_spinlock.h>
+
 
 
 #if defined(CONFIG_HIGHMEM) || defined(CONFIG_X86_32)
@@ -545,7 +547,9 @@ struct page* alloc_heap(struct heap_info* heap_info, void* vaddr, struct vm_area
 	size_t len;
 	struct free_chunk_info* free_chunks;
 
+	dram_spin_lock(heap_info->lock);
 	free_chunks = call_traverse(heap_info->arena_ptr, ((uint64_t)vaddr) >> 12, &len);
+	dram_spin_unlock(heap_info->lock);
 
 	fault_page_cache_node_t* tmp;
 	struct list_head* pos;

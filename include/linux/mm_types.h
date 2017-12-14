@@ -398,13 +398,16 @@ struct kioctx_table;
 
 
 // added by Zixiong
+
+struct dram_spinlock;
+
 struct heap_info {
 	int identifier;
 	void* arena_ptr;
 	void* heapseg_start_ptr;
 	size_t size;
 	int* new_error_info_flag;
-	//lock* flag_lock; 
+	struct dram_spinlock* lock; 
 	pid_t tid;
 	struct heap_info* next;
 };
