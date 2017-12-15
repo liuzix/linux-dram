@@ -9,7 +9,7 @@ struct {
     volatile pid_t thread_id;
 } dram_spinlock;
 
-#define SPINLOCK_ATTR static __inline __attribute__((always_inline, no_instrument_function))
+#define SPINLOCK_ATTR __attribute__((always_inline, no_instrument_function))
 
 /* Pause instruction to prevent excess processor bus usage */
 #define cpu_relax() asm volatile("pause\n": : :"memory")
