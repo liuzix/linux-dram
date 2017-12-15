@@ -399,7 +399,7 @@ struct kioctx_table;
 
 // added by Zixiong
 
-struct dram_spinlock;
+//struct dram_spinlock;
 
 struct heap_info {
 	int identifier;
