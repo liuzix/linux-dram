@@ -497,8 +497,10 @@ void __init page_address_init(void)
    If it is, returns the heap_info 
    */
 struct heap_info* is_in_heap(void* ptr) {
+	if (!current) return NULL;
 	struct mm_struct* cur_mm;
 	cur_mm = current->mm;
+	if (!cur_mm) return NULL; 
 	
 	struct heap_info* heap_info;
 	heap_info = cur_mm->heap_info;
