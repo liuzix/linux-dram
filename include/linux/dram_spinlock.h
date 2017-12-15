@@ -14,17 +14,6 @@ struct {
 /* Pause instruction to prevent excess processor bus usage */
 #define cpu_relax() asm volatile("pause\n": : :"memory")
 
-SPINLOCK_ATTR char __testandset(struct dram_spinlock *p, long old_val, long new_val)
-{
-    char result = 0;
-    asm volatile (
-            "lock; cmpxchgq %4, %1; sete %0"
-            : "=q" (result), "=m" (*p)
-            : "m" (*p), "a" (old_val), "r" (new_val)
-            : "memory");
-    return (!result);
-}
-
 SPINLOCK_ATTR void dram_spin_lock(struct dram_spinlock *lock)
 {
     //long tid = syscall(__NR_gettid);
@@ -35,18 +24,15 @@ SPINLOCK_ATTR void dram_spin_lock(struct dram_spinlock *lock)
     }
 
     tid = (tid << 32) + 1;
-    while (__testandset(lock, 0, tid)) {
+    while (!__sync_bool_compare_and_swap((u64*)lock, 0, tid)) {
         cpu_relax();
     }
 }
 
 SPINLOCK_ATTR void dram_spin_unlock(struct dram_spinlock *s)
 {
-    long new_val = 0;
-    asm volatile ("xchgq %0,%1"
-                :
-                :"m" (*s), "r" (new_val)
-                :"memory");
+    s->thread_id = 0;
+    s->lock = 0;
 }
 
 #define SPINLOCK_INITIALIZER { 0 }
