@@ -49,6 +49,11 @@ void fault_table_insert(u64 addr) {
 } 
 EXPORT_SYMBOL(fault_table_insert);
 
+asmlinkage long sys_inject_faults (u64 addr) {
+    fault_table_insert(addr);
+    return 0;
+}
+
 
 /* returns total number of faults within a page */
 int fault_table_lookup_page(u64 addr, u32* results, size_t len) {
