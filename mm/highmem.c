@@ -513,7 +513,7 @@ struct heap_info* is_in_heap(void* ptr) {
 		}
 		heap_info = heap_info->next;
 	}
-	printk(KERN_INFO "Address 0x%llx is not in heap", ptr);
+	//printk(KERN_INFO "Address 0x%llx is not in heap", ptr);
 	return NULL;
 }
 

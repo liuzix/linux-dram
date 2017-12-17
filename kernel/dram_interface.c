@@ -48,6 +48,7 @@ asmlinkage long sys_register_heap_info (int mem_allocator_identifier,
 										size_t subheap_size, 
 										int* new_error_info_flag) {
 
+	printk(KERN_INFO "Register_heap called");
 	struct mm_struct* cur_mm;
 	struct heap_info* new_info;
 
