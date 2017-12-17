@@ -508,11 +508,12 @@ struct heap_info* is_in_heap(void* ptr) {
 	while (heap_info) {
 		if (heap_info->heapseg_start_ptr <= ptr 
 			&& heap_info->heapseg_start_ptr + heap_info->size > ptr) {
+			printk(KERN_INFO "Address 0x%llx is in heap", ptr);
 			return heap_info;
 		}
 		heap_info = heap_info->next;
 	}
-
+	printk(KERN_INFO "Address 0x%llx is not in heap", ptr);
 	return NULL;
 }
 

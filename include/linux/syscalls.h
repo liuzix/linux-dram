@@ -913,6 +913,7 @@ asmlinkage long sys_get_error_info (void** buf, size_t arena_start_addr, size_t 
 asmlinkage long sys_reserve_header (void* vaddr, size_t len);  
 asmlinkage long sys_test_traverse (void* arena_start_ptr,  size_t VpageNO, size_t* len);
 asmlinkage long sys_inject_faults (u64 addr);
+asmlinkage long sys_dump_heaps (void);
 
 
 

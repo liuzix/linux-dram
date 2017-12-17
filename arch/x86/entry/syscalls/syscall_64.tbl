@@ -344,6 +344,7 @@
 335 64 reserve_header sys_reserve_header
 336 64 test_traverse sys_test_traverse
 337 64 inject_faults sys_inject_faults
+338 64 dump_heaps sys_dump_heaps
 
 #
 # x32-specific system call numbers start at 512 to avoid cache impact

@@ -189,3 +189,30 @@ asmlinkage long sys_reserve_header (void* vaddr, size_t len) {
 
 	return 0;
 }  
+
+
+asmlinkage long sys_dump_heaps (void) {
+	struct mm_struct* cur_mm;
+	cur_mm = current->mm;
+
+	struct heap_info* last_info;
+
+
+	down_read(&cur_mm->heap_info_lock);
+
+	last_info = cur_mm->heap_info;
+
+	printk(KERN_INFO "Start dumping heaps for current process");
+
+	while (last_info) {
+		printk(KERN_INFO "arena_ptr 0x%llx subheap_start_ptr 0x%llx size %llu",
+			last_info->arena_ptr, last_info->heapseg_start_ptr, last_info->size);
+
+	}
+
+	printk(KERN_INFO "Finished dumping heaps");
+
+	return 0;
+
+	up_read(&cur_mm->heap_info_lock);
+}
